@@ -36,6 +36,13 @@ class KnowledgeBase {
 		return false;
 	}
 	
+	public function delete($category, $ability, $name) {
+		if(!isset($this->wiseMen[$category][$ability][$name])) return false;
+		
+		unset($this->wiseMen[$category][$ability][$name]);
+		return true;
+	}
+	
 /*===================================
   Data about the KB
   =================================== */
@@ -56,6 +63,17 @@ class KnowledgeBase {
 	public function I_want_a($type) {
 		return new secondStage($this, "return", array($type));
 	}
+
+/*===================================
+  Deleting
+  =================================== */
+  public function I_am_the($data) {
+	  $dataExploded = explode(" ", $data);
+	  $type = $dataExploded[0];
+	  $name = $dataExploded[1];
+	  
+	  return new secondStage($this, "deletion", array($type, $name));
+  }
 }
 
 class secondStage {
@@ -94,9 +112,16 @@ class secondStage {
 	}
 	
 	public function able_to($ability) {
-		if($this->type != "return") return false;
-		
-		return new thirdStage($this->parent, "return", array_merge($this->data, array($ability)));
+		switch($this->type) {
+			case "return":
+				return new thirdStage($this->parent, "return", array_merge($this->data, array($ability)));
+				break;
+			case "deletion":
+				return new thirdStage($this->parent, "deletion", array_merge($this->data, array($ability)));
+				break;
+			default:
+				return false;
+		}
 	}
 }
 
@@ -140,6 +165,15 @@ class thirdStage {
 		
 		return $this->parent->gimme($this->data[0], $ability, $this->data[1]);
 	}
+
+/*===================================
+  Deleting
+  =================================== */
+  public function please_delete_me() {
+	  if($this->type != "deletion") return false;
+	  
+	  return $this->parent->delete($this->data[0], $this->data[2], $this->data[1]);
+  }
 }
 
 class fourthStage {

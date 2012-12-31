@@ -46,3 +46,12 @@ echo "\n\nOur computer able to surf the web: $computer1";
 
 echo "\nData of something not in the KB:   ";
 var_dump($computer2);
+
+// Our computer does not want to stay in the KB!
+$result = $kb->I_am_the("computer Any")->able_to("surf the web")->please_delete_me();
+
+// $result contains if the deletion worked.
+
+// Try to get him back...
+echo "\nOur computer able to surf the web should not be in the KB anymore: ";
+var_dump($kb->I_want_a("computer")->able_to("surf the web")->with_the_name("Any"));
