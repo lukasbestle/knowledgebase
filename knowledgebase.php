@@ -18,6 +18,9 @@ class KnowledgeBase {
 		$this->name = $name;
 	}
 	
+/*===================================
+  Internal stuff
+  =================================== */
 	public function add($category, $ability, $name, $obj) {
 		if(!isset($this->data[$category])) $this->data[$category] = array();
 		if(!isset($this->data[$category][$ability])) $this->data[$category][$ability] = array();
@@ -33,14 +36,23 @@ class KnowledgeBase {
 		return false;
 	}
 	
+/*===================================
+  Data about the KB
+  =================================== */
 	public function what_is_your_name() {
 		return $this->name;
 	}
-	
+
+/*===================================
+  Putting
+  =================================== */
 	public function I_am_a($type) {
 		return new secondStage($this, "add", array($type));
 	}
 	
+/*===================================
+  Getting
+  =================================== */
 	public function I_want_a($type) {
 		return new secondStage($this, "return", array($type));
 	}
@@ -56,7 +68,10 @@ class secondStage {
 		$this->type   = $type;
 		$this->data   = $data;
 	}
-	
+
+/*===================================
+  Adding
+  =================================== */
 	public function my_name_is($name) {
 		if($this->type != "add") return false;
 		
@@ -69,6 +84,9 @@ class secondStage {
 		return new thirdStage($this->parent, "add", array_merge($this->data, array($ability)));
 	}
 	
+/*===================================
+  Getting
+  =================================== */
 	public function with_the_name($name) {
 		if($this->type != "return") return false;
 		
@@ -93,6 +111,9 @@ class thirdStage {
 		$this->data   = $data;
 	}
 	
+/*===================================
+  Adding
+  =================================== */
 	public function and_I_can($ability) {
 		if($this->type != "add") return false;
 		
@@ -105,6 +126,9 @@ class thirdStage {
 		return new fourthStage($this->parent, "add", array_merge($this->data, array($name)), false);
 	}
 	
+/*===================================
+  Getting
+  =================================== */
 	public function with_the_name($name) {
 		if($this->type != "return") return false;
 		
@@ -131,6 +155,9 @@ class fourthStage {
 		$this->swapped = $swapped;
 	}
 	
+/*===================================
+  Adding
+  =================================== */
 	public function here_I_am($obj) {
 		if($this->type != "add") return false;
 		

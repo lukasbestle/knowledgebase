@@ -1,6 +1,6 @@
 <?php
 
-// Require the classes
+// Require the library
 require_once("knowledgebase.php");
 
 // Initialize a new KB.
