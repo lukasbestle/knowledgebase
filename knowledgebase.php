@@ -10,7 +10,7 @@
  * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
  */
 
-class KnowledgeBase {
+class KnowledgeBase implements Iterator {
 	// Name of the KB instance
 	public  $name;
 	
@@ -22,6 +22,7 @@ class KnowledgeBase {
 	private $phrases     = array(
 		"I_am_a"         => '(?<type>.+?)',
 		"I_want_a"       => '(?<type>.+?)',
+		"all_of_type"    => '(?<type>.+?)',
 		
 		"I_can"          => '(?<ability>.+?)',
 		"and_I_can"      => '(?<ability>.+?)',
@@ -46,6 +47,9 @@ class KnowledgeBase {
 	private $parent;
 	private $callData    = array();
 	
+	// Iteration array
+	private $_           = array();
+	
 	public function __construct($name = "", $parent = false, $data = false) {
 		// Set the name
 		$this->name = $name;
@@ -60,6 +64,18 @@ class KnowledgeBase {
 		// Set call data (intern usage)
 		if($data) {
 			$this->callData = $data;
+		}
+		
+		// Set the iteration array to the correct value
+		if(isset($this->callData["name"])) {
+			// Get the item, bundle it in an array so it's a valid array
+			$this->_ = array($this->parent->wiseMen[$this->callData["type"]][$this->callData["ability"]][$this->callData["name"]]);
+		} else if(isset($this->callData["ability"])) {
+			// Get all items of that ability
+			$this->_ = $this->parent->wiseMen[$this->callData["type"]][$this->callData["ability"]];
+		} else if(isset($this->callData["type"])) {
+			// Get all items of that type
+			$this->_ = $this->parent->wiseMen[$this->callData["type"]];
 		}
 	}
 	
@@ -250,5 +266,28 @@ class KnowledgeBase {
 		}
 		
 		return $this->parent;
+	}
+	
+	// =============================
+	// Iteration
+	// =============================
+	public function rewind() {
+		reset($this->_);
+	}
+	
+	public function current() {
+		return current($this->_);
+	}
+	
+	public function key() {
+		return key($this->_);
+	}
+	
+	public function next() {
+		return next($this->_);
+	}
+	
+	public function valid() {
+		return $var = $this->current() !== false;
 	}
 }

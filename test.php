@@ -87,5 +87,14 @@ $kb->defineRemover("I_dont_want_to_have_me_in_the_KB");
 
 // Let's test that!
 // Note I use capitalization for the p in people - you can do that with the first char :)
-$kb->People_think_I_am_very_good_at_writing("code")->I_am_a("student named Lukas Bestle")->make_me_available_for_hire("Some data about me!");
-echo "\nHere I am again: " . $kb->I_want_a("student")->able_to("code")->with_the_name("Lukas Bestle")->what_is_his_information() . "\n";
+$kb->People_think_I_am_very_good_at_writing("code")->I_am_a("student named Lukas Bestle")->make_me_available_for_hire("Some data about Lukas Bestle!");
+echo "\nHere I am again: " . $kb->I_want_a("student")->able_to("code")->with_the_name("Lukas Bestle")->what_is_his_information() . "\n\n";
+
+// Add another student able to code
+$kb->People_think_I_am_very_good_at_writing("code")->I_am_a("student named luX")->make_me_available_for_hire("Some data about luX!");
+
+// Let us iterate through some items (you can do that with any queue object!)
+echo "Iterate through some items:\n";
+foreach($kb->All_of_type("student")->able_to("code") as $name => $item) {
+	echo "The student named \"$name\" has the data \"$item\"\n";
+}
