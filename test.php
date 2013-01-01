@@ -42,14 +42,15 @@ $kb->I_am_a("computer")->I_can("surf the web")->and_my_name_is("Any")->set("Some
 
 // Let's get the data of this computer back...
 $computer1 = $kb->I_want_a("computer")->able_to("surf the web")->with_the_name("Any")->gimme();
+echo "\n\nOur computer able to surf the web: $computer1\n\n";
 
 // Now, let's ask for a computer which is not in the KB!
-$computer2 = $kb->I_want_a("computer")->able_to("surf the web")->with_the_name("MacBook Pro")->gimme();
-
-echo "\n\nOur computer able to surf the web: $computer1";
-
-echo "\nData of something not in the KB:   ";
-var_dump($computer2);
+echo "Data of something not in the KB:\n";
+try {
+	var_dump($kb->I_want_a("computer")->able_to("surf the web")->with_the_name("MacBook Pro")->gimme());
+} catch(Exception $e) {
+	echo 'Caught the exception "' . $e->getMessage() . "\"\n";
+}
 
 // Our computer does not want to stay in the KB!
 $result = $kb->I_am_the("computer Any")->able_to("surf the web")->remove();
@@ -57,8 +58,12 @@ $result = $kb->I_am_the("computer Any")->able_to("surf the web")->remove();
 // $result contains if the deletion worked.
 
 // Try to get him back...
-echo "\nOur computer able to surf the web should not be in the KB anymore: ";
-var_dump($kb->I_want_a("computer")->able_to("surf the web")->with_the_name("Any")->gimme());
+echo "\nOur computer able to surf the web should not be in the KB anymore:\n";
+try {
+	var_dump($kb->I_want_a("computer")->able_to("surf the web")->with_the_name("Any")->gimme());
+} catch(Exception $e) {
+	echo 'Caught the exception "' . $e->getMessage() . "\"\n";
+}
 
 // Now, we want to use some other phrases to access the KB. Let's tell it about that...
 // This one defines that a phrase named "my_cool_name" defines the property $name.

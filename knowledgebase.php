@@ -73,7 +73,7 @@ class KnowledgeBase {
 				// There's a phrase for that!
 				
 				// We need the argument for any phrase
-				if(!isset($arguments[0])) return false;
+				if(!isset($arguments[0])) throw new Exception("No argument given.");
 				
 				// Get the correct phrase
 				$phrase = $this->parent->phrases[$name];
@@ -95,7 +95,7 @@ class KnowledgeBase {
 					return new $className($this->parent->name, $this->parent, $data);
 				} else {
 					// Couldn't match
-					return false;
+					throw new Exception("Input did not match phrase $name.");
 				}
 			} else if(in_array($name, $this->parent->nameGetters)) {
 				// User wants to get the name of the KB
@@ -111,7 +111,7 @@ class KnowledgeBase {
 						
 						// We need the argument (contains the data to set)
 						if(!isset($arguments[0])) {
-							return false;
+							throw new Exception("No argument given.");
 						}
 						
 						// Set the data
@@ -129,17 +129,17 @@ class KnowledgeBase {
 					} else {
 						// The KB does not know what to do (no fitting task defined)
 						// Should never happen - then it would be a bug in here
-						return false;
+						throw new Exception("Could not find a task. This is a bug in KB.php, please report it!");
 					}
 				} else {
 					// Not all data available
-					return false;
+					throw new Exception("There is some data missing needed to call this.");
 				}
 			}
 		}
 		
 		// The KB does not know what to do (no fitting task defined)
-		return false;
+		throw new Exception("There is no task doing that what you wanted.");
 	}
 	
 	// =============================
@@ -157,7 +157,7 @@ class KnowledgeBase {
 	
 	protected function get($type, $ability, $name) {
 		if(!isset($this->wiseMen[$type][$ability][$name])) {
-			return false;
+			throw new Exception("Could not find the element you requested.");
 		}
 		
 		return $this->wiseMen[$type][$ability][$name];
@@ -165,7 +165,7 @@ class KnowledgeBase {
 	
 	protected function remove($type, $ability, $name) {
 		if(!isset($this->wiseMen[$type][$ability][$name])) {
-			return false;
+			throw new Exception("Could not find the element you requested.");
 		}
 		
 		unset($this->wiseMen[$type][$ability][$name]);
