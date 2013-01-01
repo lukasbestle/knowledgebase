@@ -81,5 +81,6 @@ $kb->defineGetter("what_is_his_information");
 $kb->defineRemover("I_dont_want_to_have_me_in_the_KB");
 
 // Let's test that!
-$kb->people_think_I_am_very_good_at_writing("code")->I_am_a("student named Lukas Bestle")->make_me_available_for_hire("Some data about me!");
+// Note I use capitalization for the p in people - you can do that with the first char :)
+$kb->People_think_I_am_very_good_at_writing("code")->I_am_a("student named Lukas Bestle")->make_me_available_for_hire("Some data about me!");
 echo "\nHere I am again: " . $kb->I_want_a("student")->able_to("code")->with_the_name("Lukas Bestle")->what_is_his_information() . "\n";

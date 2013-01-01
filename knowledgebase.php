@@ -66,77 +66,80 @@ class KnowledgeBase {
 	// =============================
 	// All the magic!
 	// =============================
-	public function __call($name, $arguments) {
-		if(isset($this->parent->phrases[$name])) {
-			// There's a phrase for that!
-			
-			// We need the argument for any phrase
-			if(!isset($arguments[0])) return false;
-			
-			// Get the correct phrase
-			$phrase = $this->parent->phrases[$name];
-			
-			// Match the phrase to extract information
-			if(preg_match("{^$phrase$}", $arguments[0], $matches)) {
-				// Get the current set of data
-				$data = $this->callData;
+	public function __call($name_orig, $arguments) {
+		// Capitalization
+		foreach(array($name_orig, lcfirst($name_orig)) as $name) {
+			if(isset($this->parent->phrases[$name])) {
+				// There's a phrase for that!
 				
-				// Add the new information
-				if(isset($matches["name"])) $data["name"] = $matches["name"];
-				if(isset($matches["ability"])) $data["ability"] = $matches["ability"];
-				if(isset($matches["type"])) $data["type"] = $matches["type"];
+				// We need the argument for any phrase
+				if(!isset($arguments[0])) return false;
 				
-				// Get the class name to know which class to spawn
-				$className = get_class($this);
+				// Get the correct phrase
+				$phrase = $this->parent->phrases[$name];
 				
-				// Create a new instance of itself and give it some information what to do
-				return new $className($this->parent->name, $this->parent, $data);
-			} else {
-				// Couldn't match
-				return false;
-			}
-		} else if(in_array($name, $this->parent->nameGetters)) {
-			// User wants to get the name of the KB
-			// We use that one from the topmost instance - it could have changed already since that instance spawned
-			return $this->parent->name;
-		} else if(in_array($name, $this->parent->setters) || in_array($name, $this->parent->getters) || in_array($name, $this->parent->removers)) {
-			// The last element of the chain
-			
-			// We need all data set by phrases to do anything here
-			if(isset($this->callData["name"]) && isset($this->callData["ability"]) && isset($this->callData["type"])) {
-				if(in_array($name, $this->parent->setters)) {
-					// It is a setter
+				// Match the phrase to extract information
+				if(preg_match("{^$phrase$}", $arguments[0], $matches)) {
+					// Get the current set of data
+					$data = $this->callData;
 					
-					// We need the argument (contains the data to set)
-					if(!isset($arguments[0])) {
-						return false;
-					}
+					// Add the new information
+					if(isset($matches["name"])) $data["name"] = $matches["name"];
+					if(isset($matches["ability"])) $data["ability"] = $matches["ability"];
+					if(isset($matches["type"])) $data["type"] = $matches["type"];
 					
-					// Set the data
-					return $this->parent->set($this->callData["type"], $this->callData["ability"], $this->callData["name"], $arguments[0]);
-				} else if(in_array($name, $this->parent->getters)) {
-					// It is a getter
+					// Get the class name to know which class to spawn
+					$className = get_class($this);
 					
-					// Get the data and return it
-					return $this->parent->get($this->callData["type"], $this->callData["ability"], $this->callData["name"]);
-				} else if(in_array($name, $this->parent->removers)) {
-					// It is a remover
-					
-					// Remove the data
-					return $this->parent->remove($this->callData["type"], $this->callData["ability"], $this->callData["name"]);
+					// Create a new instance of itself and give it some information what to do
+					return new $className($this->parent->name, $this->parent, $data);
 				} else {
-					// The KB does not know what to do (no fitting task defined)
-					// Should never happen - then it would be a bug in here
+					// Couldn't match
 					return false;
 				}
-			} else {
-				// Not all data available
-				return false;
+			} else if(in_array($name, $this->parent->nameGetters)) {
+				// User wants to get the name of the KB
+				// We use that one from the topmost instance - it could have changed already since that instance spawned
+				return $this->parent->name;
+			} else if(in_array($name, $this->parent->setters) || in_array($name, $this->parent->getters) || in_array($name, $this->parent->removers)) {
+				// The last element of the chain
+				
+				// We need all data set by phrases to do anything here
+				if(isset($this->callData["name"]) && isset($this->callData["ability"]) && isset($this->callData["type"])) {
+					if(in_array($name, $this->parent->setters)) {
+						// It is a setter
+						
+						// We need the argument (contains the data to set)
+						if(!isset($arguments[0])) {
+							return false;
+						}
+						
+						// Set the data
+						return $this->parent->set($this->callData["type"], $this->callData["ability"], $this->callData["name"], $arguments[0]);
+					} else if(in_array($name, $this->parent->getters)) {
+						// It is a getter
+						
+						// Get the data and return it
+						return $this->parent->get($this->callData["type"], $this->callData["ability"], $this->callData["name"]);
+					} else if(in_array($name, $this->parent->removers)) {
+						// It is a remover
+						
+						// Remove the data
+						return $this->parent->remove($this->callData["type"], $this->callData["ability"], $this->callData["name"]);
+					} else {
+						// The KB does not know what to do (no fitting task defined)
+						// Should never happen - then it would be a bug in here
+						return false;
+					}
+				} else {
+					// Not all data available
+					return false;
+				}
 			}
-		} else {
-			// The KB does not know what to do (no fitting task defined)
-			return false;
 		}
+		
+		// The KB does not know what to do (no fitting task defined)
+		return false;
 	}
 	
 	// =============================
