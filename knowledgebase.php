@@ -11,194 +11,241 @@
  */
 
 class KnowledgeBase {
+	// Name of the KB instance
 	public  $name;
-	private $wiseMen = array();
 	
-	public function __construct($name = "") {
+	// The data storage
+	private $wiseMen     = array();
+	
+	// Phrases to set information about the stuff the caller wants to set or get
+	// These are already valid RegExes, but the definePhrase() function lets you use $type, $ability and $name instead
+	private $phrases     = array(
+		"I_am_a"         => '(?<type>.+?)',
+		"I_want_a"       => '(?<type>.+?)',
+		
+		"I_can"          => '(?<ability>.+?)',
+		"and_I_can"      => '(?<ability>.+?)',
+		"able_to"        => '(?<ability>.+?)',
+		
+		"with_the_name"  => '(?<name>.+?)',
+		"my_name_is"     => '(?<name>.+?)',
+		"and_my_name_is" => '(?<name>.+?)',
+		
+		"I_am_the"       => '(?<type>.+?) (?<name>.+?)'
+	);
+	
+	// Functions called at the end of the queue to do something
+	private $setters     = array("set");
+	private $getters     = array("gimme");
+	private $removers    = array("remove");
+	
+	// Functions to get the name of the KB instance
+	private $nameGetters = array("what_is_your_name");
+	
+	// Stuff for the instance to know what to do
+	private $parent;
+	private $callData    = array();
+	
+	public function __construct($name = "", $parent = false, $data = false) {
+		// Set the name
 		$this->name = $name;
-	}
-	
-/*===================================
-  Internal stuff
-  =================================== */
-	public function add($category, $ability, $name, $obj) {
-		if(!isset($this->data[$category])) $this->data[$category] = array();
-		if(!isset($this->data[$category][$ability])) $this->data[$category][$ability] = array();
 		
-		$this->wiseMen[$category][$ability][$name] = $obj;
-		
-		return true;
-	}
-	
-	public function gimme($category, $ability, $name) {
-		if(isset($this->wiseMen[$category][$ability][$name])) return $this->wiseMen[$category][$ability][$name];
-		
-		return false;
-	}
-	
-	public function delete($category, $ability, $name) {
-		if(!isset($this->wiseMen[$category][$ability][$name])) return false;
-		
-		unset($this->wiseMen[$category][$ability][$name]);
-		return true;
-	}
-	
-/*===================================
-  Data about the KB
-  =================================== */
-	public function what_is_your_name() {
-		return $this->name;
-	}
-
-/*===================================
-  Putting
-  =================================== */
-	public function I_am_a($type) {
-		return new secondStage($this, "add", array($type));
-	}
-	
-/*===================================
-  Getting
-  =================================== */
-	public function I_want_a($type) {
-		return new secondStage($this, "return", array($type));
-	}
-
-/*===================================
-  Deleting
-  =================================== */
-  public function I_am_the($data) {
-	  $dataExploded = explode(" ", $data);
-	  $type = $dataExploded[0];
-	  $name = $dataExploded[1];
-	  
-	  return new secondStage($this, "deletion", array($type, $name));
-  }
-}
-
-class secondStage {
-	private $parent;
-	private $type;
-	private $data;
-	
-	public function __construct($parent, $type, $data) {
-		$this->parent = $parent;
-		$this->type   = $type;
-		$this->data   = $data;
-	}
-
-/*===================================
-  Adding
-  =================================== */
-	public function my_name_is($name) {
-		if($this->type != "add") return false;
-		
-		return new thirdStage($this->parent, "add", array_merge($this->data, array($name)));
-	}
-	
-	public function I_can($ability) {
-		if($this->type != "add") return false;
-		
-		return new thirdStage($this->parent, "add", array_merge($this->data, array($ability)));
-	}
-	
-/*===================================
-  Getting
-  =================================== */
-	public function with_the_name($name) {
-		if($this->type != "return") return false;
-		
-		return new thirdStage($this->parent, "return", array_merge($this->data, array($name)));
-	}
-	
-	public function able_to($ability) {
-		switch($this->type) {
-			case "return":
-				return new thirdStage($this->parent, "return", array_merge($this->data, array($ability)));
-				break;
-			case "deletion":
-				return new thirdStage($this->parent, "deletion", array_merge($this->data, array($ability)));
-				break;
-			default:
-				return false;
-		}
-	}
-}
-
-class thirdStage {
-	private $parent;
-	private $type;
-	private $data;
-	
-	public function __construct($parent, $type, $data) {
-		$this->parent = $parent;
-		$this->type   = $type;
-		$this->data   = $data;
-	}
-	
-/*===================================
-  Adding
-  =================================== */
-	public function and_I_can($ability) {
-		if($this->type != "add") return false;
-		
-		return new fourthStage($this->parent, "add", array_merge($this->data, array($ability)), true);
-	}
-	
-	public function and_my_name_is($name) {
-		if($this->type != "add") return false;
-		
-		return new fourthStage($this->parent, "add", array_merge($this->data, array($name)), false);
-	}
-	
-/*===================================
-  Getting
-  =================================== */
-	public function with_the_name($name) {
-		if($this->type != "return") return false;
-		
-		return $this->parent->gimme($this->data[0], $this->data[1], $name);
-	}
-	
-	public function able_to($ability) {
-		if($this->type != "return") return false;
-		
-		return $this->parent->gimme($this->data[0], $ability, $this->data[1]);
-	}
-
-/*===================================
-  Deleting
-  =================================== */
-  public function please_delete_me() {
-	  if($this->type != "deletion") return false;
-	  
-	  return $this->parent->delete($this->data[0], $this->data[2], $this->data[1]);
-  }
-}
-
-class fourthStage {
-	private $parent;
-	private $type;
-	private $data;
-	private $swapped;
-	
-	public function __construct($parent, $type, $data, $swapped) {
-		$this->parent  = $parent;
-		$this->type    = $type;
-		$this->data    = $data;
-		$this->swapped = $swapped;
-	}
-	
-/*===================================
-  Adding
-  =================================== */
-	public function here_I_am($obj) {
-		if($this->type != "add") return false;
-		
-		if($this->swapped) {
-			return $this->parent->add($this->data[0], $this->data[2], $this->data[1], $obj);
+		// Set the topmost parent (the instance the user created)
+		if($parent) {
+			$this->parent = $parent;
 		} else {
-			return $this->parent->add($this->data[0], $this->data[1], $this->data[2], $obj);
+			$this->parent = $this;
 		}
+		
+		// Set call data (intern usage)
+		if($data) {
+			$this->callData = $data;
+		}
+	}
+	
+	// =============================
+	// All the magic!
+	// =============================
+	public function __call($name, $arguments) {
+		if(isset($this->parent->phrases[$name])) {
+			// There's a phrase for that!
+			
+			// We need the argument for any phrase
+			if(!isset($arguments[0])) return false;
+			
+			// Get the correct phrase
+			$phrase = $this->parent->phrases[$name];
+			
+			// Match the phrase to extract information
+			if(preg_match("{^$phrase$}", $arguments[0], $matches)) {
+				// Get the current set of data
+				$data = $this->callData;
+				
+				// Add the new information
+				if(isset($matches["name"])) $data["name"] = $matches["name"];
+				if(isset($matches["ability"])) $data["ability"] = $matches["ability"];
+				if(isset($matches["type"])) $data["type"] = $matches["type"];
+				
+				// Get the class name to know which class to spawn
+				$className = get_class($this);
+				
+				// Create a new instance of itself and give it some information what to do
+				return new $className($this->parent->name, $this->parent, $data);
+			} else {
+				// Couldn't match
+				return false;
+			}
+		} else if(in_array($name, $this->parent->nameGetters)) {
+			// User wants to get the name of the KB
+			// We use that one from the topmost instance - it could have changed already since that instance spawned
+			return $this->parent->name;
+		} else if(in_array($name, $this->parent->setters) || in_array($name, $this->parent->getters) || in_array($name, $this->parent->removers)) {
+			// The last element of the chain
+			
+			// We need all data set by phrases to do anything here
+			if(isset($this->callData["name"]) && isset($this->callData["ability"]) && isset($this->callData["type"])) {
+				if(in_array($name, $this->parent->setters)) {
+					// It is a setter
+					
+					// We need the argument (contains the data to set)
+					if(!isset($arguments[0])) {
+						return false;
+					}
+					
+					// Set the data
+					return $this->parent->set($this->callData["type"], $this->callData["ability"], $this->callData["name"], $arguments[0]);
+				} else if(in_array($name, $this->parent->getters)) {
+					// It is a getter
+					
+					// Get the data and return it
+					return $this->parent->get($this->callData["type"], $this->callData["ability"], $this->callData["name"]);
+				} else if(in_array($name, $this->parent->removers)) {
+					// It is a remover
+					
+					// Remove the data
+					return $this->parent->remove($this->callData["type"], $this->callData["ability"], $this->callData["name"]);
+				} else {
+					// The KB does not know what to do (no fitting task defined)
+					// Should never happen - then it would be a bug in here
+					return false;
+				}
+			} else {
+				// Not all data available
+				return false;
+			}
+		} else {
+			// The KB does not know what to do (no fitting task defined)
+			return false;
+		}
+	}
+	
+	// =============================
+	// Internal functions
+	// Used to access the data store
+	// =============================
+	protected function set($type, $ability, $name, $data) {
+		if(!isset($this->wiseMen[$type])) $this->wiseMen[$type]                     = array();
+		if(!isset($this->wiseMen[$type][$ability])) $this->wiseMen[$type][$ability] = array();
+		
+		$this->wiseMen[$type][$ability][$name] = $data;
+		
+		return true;
+	}
+	
+	protected function get($type, $ability, $name) {
+		if(!isset($this->wiseMen[$type][$ability][$name])) {
+			return false;
+		}
+		
+		return $this->wiseMen[$type][$ability][$name];
+	}
+	
+	protected function remove($type, $ability, $name) {
+		if(!isset($this->wiseMen[$type][$ability][$name])) {
+			return false;
+		}
+		
+		unset($this->wiseMen[$type][$ability][$name]);
+	}
+	
+	// =============================
+	// Helper functions (definers)
+	// =============================
+	public function defineNameGetter($name) {
+		$this->parent->nameGetters[] = $name;
+		
+		return $this->parent;
+	}
+	
+	public function definePhrase($name, $phrase) {
+		// Parse the phrase and make it a valid RegEx
+		$phrase = str_replace('$name', '(?<name>.+?)', $phrase);
+		$phrase = str_replace('$ability', '(?<ability>.+?)', $phrase);
+		$phrase = str_replace('$type', '(?<type>.+?)', $phrase);
+		
+		$this->parent->phrases[$name] = $phrase;
+		
+		return $this->parent;
+	}
+	
+	public function defineSetter($name) {
+		$this->parent->setters[] = $name;
+		
+		return $this->parent;
+	}
+	
+	public function defineGetter($name) {
+		$this->parent->getters[] = $name;
+		
+		return $this->parent;
+	}
+	
+	public function defineRemover($name) {
+		$this->parent->removers[] = $name;
+		
+		return $this->parent;
+	}
+	
+	// =============================
+	// Helper functions (undefiners)
+	// =============================
+	public function undefineNameGetter($name) {
+		if(array_search($name, $this->parent->nameGetters)) {
+			unset($this->parent->nameGetters[array_search($name, $this->parent->nameGetters)]);
+		}
+		
+		return $this->parent;
+	}
+	
+	public function undefinePhrase($name) {
+		if(isset($this->parent->phrases[$name])) {
+			unset($this->parent->phrases[$name]);
+		}
+		
+		return $this->parent;
+	}
+	
+	public function undefineSetter($name) {
+		if(array_search($name, $this->parent->setters)) {
+			unset($this->parent->setters[array_search($name, $this->parent->setters)]);
+		}
+		
+		return $this->parent;
+	}
+	
+	public function undefineGetter($name) {
+		if(array_search($name, $this->parent->getters)) {
+			unset($this->parent->getters[array_search($name, $this->parent->getters)]);
+		}
+		
+		return $this->parent;
+	}
+	
+	public function undefineRemover($name) {
+		if(array_search($name, $this->parent->removers)) {
+			unset($this->parent->removers[array_search($name, $this->parent->removers)]);
+		}
+		
+		return $this->parent;
 	}
 }
