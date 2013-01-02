@@ -22,32 +22,46 @@ $lukasObj = array("this array" => "could be anything", "for example" => "an obje
 $kb->I_am_a("person")->my_name_is("Lukas")->and_I_can("program")->set($lukasObj);
 
 // Let's get our data back out of it...
-// There are two different ways to do that - depending on the language that makes more sense here
+// There are a lot different ways to do that - depending on the language that makes more sense here
 $lukasObj1 = $kb->I_want_a("person")->able_to("program")->with_the_name("Lukas")->gimme();
 $lukasObj2 = $kb->I_want_a("person")->with_the_name("Lukas")->able_to("program")->gimme();
 
-// Let's see: Does the KB remember me?
+// You can now get the data and meta information out of it
+$lukasObj1Data = $lukasObj1->data;
+$lukasObj2Data = $lukasObj2->data;
+$name = $lukasObj1->name;
+
+// But that is cool: You can even change the information in that object direcly:
+$lukasObj1->name = "My name is not Lukas anymore!";
+
+// Let's try to get the data using the new name:
+$lukasObjNewData = $kb->I_want_a("person")->able_to("program")->with_the_name("My name is not Lukas anymore!")->gimme()->data;
+
+// And here's the data:
 echo "Data before the KB took my data:\n";
 print_r($lukasObj);
 
 echo "\nData in query way number 1:\n";
-print_r($lukasObj1);
+print_r($lukasObj1Data);
 
 echo "\nData in query way number 2:\n";
-print_r($lukasObj2);
+print_r($lukasObj2Data);
+
+echo "\nData from the magically changed object:\n";
+print_r($lukasObjNewData);
 
 // Let's give the KB a computer with the ability to surf the web who's name is "Any".
 // You see: You can also query write operations other way round: First ability, then name!
 $kb->I_am_a("computer")->I_can("surf the web")->and_my_name_is("Any")->set("Some data about me!");
 
 // Let's get the data of this computer back...
-$computer1 = $kb->I_want_a("computer")->able_to("surf the web")->with_the_name("Any")->gimme();
+$computer1 = $kb->I_want_a("computer")->able_to("surf the web")->with_the_name("Any")->gimme()->data;
 echo "\n\nOur computer able to surf the web: $computer1\n\n";
 
 // Now, let's ask for a computer which is not in the KB!
 echo "Data of something not in the KB:\n";
 try {
-	var_dump($kb->I_want_a("computer")->able_to("surf the web")->with_the_name("MacBook Pro")->gimme());
+	var_dump($kb->I_want_a("computer")->able_to("surf the web")->with_the_name("MacBook Pro")->gimme()->data);
 } catch(Exception $e) {
 	echo 'Caught the exception "' . $e->getMessage() . "\"\n";
 }
@@ -88,13 +102,13 @@ $kb->defineRemover("I_dont_want_to_have_me_in_the_KB");
 // Let's test that!
 // Note I use capitalization for the p in people - you can do that with the first char :)
 $kb->People_think_I_am_very_good_at_writing("code")->I_am_a("student named Lukas Bestle")->make_me_available_for_hire("Some data about Lukas Bestle!");
-echo "\nHere I am again: " . $kb->I_want_a("student")->able_to("code")->with_the_name("Lukas Bestle")->what_is_his_information() . "\n\n";
+echo "\nHere I am again: " . $kb->I_want_a("student")->able_to("code")->with_the_name("Lukas Bestle")->what_is_his_information()->data . "\n\n";
 
 // Add another student able to code
 $kb->People_think_I_am_very_good_at_writing("code")->I_am_a("student named luX")->make_me_available_for_hire("Some data about luX!");
 
 // Let us iterate through some items (you can do that with any queue object!)
 echo "Iterate through some items:\n";
-foreach($kb->All_of_type("student")->able_to("code") as $name => $item) {
-	echo "The student named \"$name\" has the data \"$item\"\n";
+foreach($kb->All_of_type("student")->able_to("code") as $item) {
+	echo 'The student named "' . $item->name . '" has the data "' . $item->data . "\"\n";
 }

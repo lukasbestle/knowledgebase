@@ -131,17 +131,17 @@ class KnowledgeBase implements Iterator {
 						}
 						
 						// Set the data
-						return $this->parent->set($this->callData["type"], $this->callData["ability"], $this->callData["name"], $arguments[0]);
+						return $this->parent->setObj($this->callData["type"], $this->callData["ability"], $this->callData["name"], $arguments[0]);
 					} else if(in_array($name, $this->parent->getters)) {
 						// It is a getter
 						
 						// Get the data and return it
-						return $this->parent->get($this->callData["type"], $this->callData["ability"], $this->callData["name"]);
+						return $this->parent->getObj($this->callData["type"], $this->callData["ability"], $this->callData["name"]);
 					} else if(in_array($name, $this->parent->removers)) {
 						// It is a remover
 						
 						// Remove the data
-						return $this->parent->remove($this->callData["type"], $this->callData["ability"], $this->callData["name"]);
+						return $this->parent->removeObj($this->callData["type"], $this->callData["ability"], $this->callData["name"]);
 					} else {
 						// The KB does not know what to do (no fitting task defined)
 						// Should never happen - then it would be a bug in here
@@ -162,16 +162,16 @@ class KnowledgeBase implements Iterator {
 	// Internal functions
 	// Used to access the data store
 	// =============================
-	protected function set($type, $ability, $name, $data) {
+	public function setObj($type, $ability, $name, $data) {
 		if(!isset($this->wiseMen[$type])) $this->wiseMen[$type]                     = array();
 		if(!isset($this->wiseMen[$type][$ability])) $this->wiseMen[$type][$ability] = array();
 		
-		$this->wiseMen[$type][$ability][$name] = $data;
+		$this->wiseMen[$type][$ability][$name] = new WiseMan($type, $ability, $name, $data, $this);
 		
 		return true;
 	}
 	
-	protected function get($type, $ability, $name) {
+	public function getObj($type, $ability, $name) {
 		if(!isset($this->wiseMen[$type][$ability][$name])) {
 			throw new Exception("Could not find the element you requested.");
 		}
@@ -179,7 +179,7 @@ class KnowledgeBase implements Iterator {
 		return $this->wiseMen[$type][$ability][$name];
 	}
 	
-	protected function remove($type, $ability, $name) {
+	public function removeObj($type, $ability, $name) {
 		if(!isset($this->wiseMen[$type][$ability][$name])) {
 			throw new Exception("Could not find the element you requested.");
 		}
@@ -294,5 +294,72 @@ class KnowledgeBase implements Iterator {
 	
 	public function valid() {
 		return $var = $this->current() !== false;
+	}
+}
+
+// =============================
+// The item object
+// =============================
+class WiseMan {
+	// Hidden information
+	private $_ = array(
+		"type" => "",
+		"ability" => "",
+		"name" => ""
+	);
+	
+	// The KB object to change data
+	private $kb;
+	
+	// The real data in the moment the object was created
+	public $staticData;
+	
+	public function __construct($type, $ability, $name, $data, $kb) {
+		$this->kb           = $kb;
+		
+		$this->_["type"]    = $type;
+		$this->_["ability"] = $ability;
+		$this->_["name"]    = $name;
+		
+		$this->staticData   = $data;
+	}
+	
+	// Get meta data out of the hidden object
+	public function __get($item) {
+		if($item == "data") {
+			return $this->kb->getObj($this->_["type"], $this->_["ability"], $this->_["name"])->staticData;
+		}
+		
+		if(!isset($this->_[$item])) return false;
+		
+		return $this->_[$item];
+	}
+	
+	// Set the meta data
+	public function __set($item, $value) {
+		if($item == "data") {
+			$this->kb->setObj($this->_["type"], $this->_["ability"], $this->_["name"], $value);
+			return true;
+		}
+		
+		if(!isset($this->_[$item])) return false;
+		
+		// Get the current data
+		$data = $this->kb->getObj($this->_["type"], $this->_["ability"], $this->_["name"])->staticData;
+		
+		// Remove the old item
+		$this->kb->removeObj($this->_["type"], $this->_["ability"], $this->_["name"]);
+		
+		// Set the new data
+		$this->_[$item] = $value;
+		
+		// Add the new item again
+		$this->kb->setObj($this->_["type"], $this->_["ability"], $this->_["name"], $data);
+		
+		return true;
+	}
+	
+	public function __toString() {
+		return print_r($this->__get("data"), true);
 	}
 }
