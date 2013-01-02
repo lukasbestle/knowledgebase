@@ -3,7 +3,7 @@
 /**
  * KnowledgeBase.php - an object storage producing *real* speaking code implemented in PHP.
  *
- * @version 1.0
+ * @version 1.1
  * @author Lukas Bestle <lukas@lu-x.me>
  * @link http://lu-x.me
  * @copyright Copyright 2012-2012 Lukas Bestle
