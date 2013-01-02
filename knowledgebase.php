@@ -185,6 +185,11 @@ class KnowledgeBase implements Iterator {
 		}
 		
 		unset($this->wiseMen[$type][$ability][$name]);
+		
+		if($this->wiseMen[$type][$ability] == array()) unset($this->wiseMen[$type][$ability]);
+		if($this->wiseMen[$type] == array()) unset($this->wiseMen[$type]);
+		
+		return true;
 	}
 	
 	// =============================
