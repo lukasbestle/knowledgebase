@@ -19,12 +19,12 @@ echo "Name got using the new defined name getter: " . $kb->tell_me_your_name() .
 $lukasObj = array("this array" => "could be anything", "for example" => "an object", "or" => "a string");
 
 // Let's tell the KB I'm here and I want to participate.
-$kb->I_am_a("person")->my_name_is("Lukas")->and_I_can("program")->set($lukasObj);
+$kb->I_am_a("student")->my_name_is("Lukas")->and_I_can("program")->set($lukasObj);
 
 // Let's get our data back out of it...
 // There are a lot different ways to do that - depending on the language that makes more sense here
-$lukasObj1 = $kb->I_want_a("person")->able_to("program")->with_the_name("Lukas")->gimme();
-$lukasObj2 = $kb->I_want_a("person")->with_the_name("Lukas")->able_to("program")->gimme();
+$lukasObj1 = $kb->I_want_a("student")->able_to("program")->with_the_name("Lukas")->gimme();
+$lukasObj2 = $kb->I_want_a("student")->with_the_name("Lukas")->able_to("program")->gimme();
 
 // You can now get the data and meta information out of it
 $lukasObj1Data = $lukasObj1->data;
@@ -35,7 +35,7 @@ $name = $lukasObj1->name;
 $lukasObj1->name = "My name is not Lukas anymore!";
 
 // Let's try to get the data using the new name:
-$lukasObjNewData = $kb->I_want_a("person")->able_to("program")->with_the_name("My name is not Lukas anymore!")->gimme()->data;
+$lukasObjNewData = $kb->I_want_a("student")->able_to("program")->with_the_name("My name is not Lukas anymore!")->gimme()->data;
 
 // And here's the data:
 echo "Data before the KB took my data:\n";
@@ -86,12 +86,12 @@ $kb->definePhrase("people_think_I_am_very_good_at_writing", '$ability');
 // Let us define another one
 // Here, we need to remove the old phrase to do that
 // You can do the same with setters, getters, removers and name getters!
-$kb->undefinePhrase("I_am_a");
+$kb->undefinePhrase("I_am_the");
 // You can define all formats fitting in a string. This is then matched by a RegEx.
-$kb->definePhrase("I_am_a", '$type named $name');
+$kb->definePhrase("I_am_the", '$type named $name');
 
 // You could also write that like so:
-$kb->undefinePhrase("I_am_a")->definePhrase("I_am_a", '$type named $name');
+$kb->undefinePhrase("I_am_the")->definePhrase("I_am_the", '$type named $name');
 
 // Because the KB has to know if your phrases are setter, getter or remover, you have to append "set", "gimme" or "remove" to the query
 // But you can change that!
@@ -101,14 +101,22 @@ $kb->defineRemover("I_dont_want_to_have_me_in_the_KB");
 
 // Let's test that!
 // Note I use capitalization for the p in people - you can do that with the first char :)
-$kb->People_think_I_am_very_good_at_writing("code")->I_am_a("student named Lukas Bestle")->make_me_available_for_hire("Some data about Lukas Bestle!");
+$kb->People_think_I_am_very_good_at_writing("code")->I_am_the("student named Lukas Bestle")->make_me_available_for_hire("Some data about Lukas Bestle!");
 echo "\nHere I am again: " . $kb->I_want_a("student")->able_to("code")->with_the_name("Lukas Bestle")->what_is_his_information()->data . "\n\n";
 
-// Add another student able to code
-$kb->People_think_I_am_very_good_at_writing("code")->I_am_a("student named luX")->make_me_available_for_hire("Some data about luX!");
+// Add some new items
+$kb->People_think_I_am_very_good_at_writing("code")->I_am_the("student named luX")->make_me_available_for_hire("Some data about luX!");
+$kb->I_am_a("computer")->I_can("surf the web")->and_my_name_is("MacBook Air")->set("I have a lot information!");
+$kb->I_am_a("dinner")->I_can("make people well-fed")->and_my_name_is("I don't know, actually...")->set("Yay! I'm in the KB");
 
-// Let us iterate through some items (you can do that with any queue object!)
+// Let us get all students from the KB and iterate (you can do that with any queue object!)
 echo "Iterate through some items:\n";
-foreach($kb->All_of_type("student")->able_to("code") as $item) {
-	echo 'The student named "' . $item->name . '" has the data "' . $item->data . "\"\n";
+foreach($kb->All_of_type("student") as $item) {
+	echo 'The student named "' . $item->name . '" can "' . $item->ability .'" and has the data "' . $item->data . "\"\n";
+}
+
+// Get all items from the KB and iterate
+echo "\nIterate through all items:\n";
+foreach($kb as $item) {
+	echo 'The "' . $item->type .'" named "' . $item->name . '" can "' . $item->ability .'" and has the data "' . $item->data . "\"\n";
 }

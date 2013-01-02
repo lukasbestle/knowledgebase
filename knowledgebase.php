@@ -65,18 +65,6 @@ class KnowledgeBase implements Iterator {
 		if($data) {
 			$this->callData = $data;
 		}
-		
-		// Set the iteration array to the correct value
-		if(isset($this->callData["name"])) {
-			// Get the item, bundle it in an array so it's a valid array
-			$this->_ = array($this->parent->wiseMen[$this->callData["type"]][$this->callData["ability"]][$this->callData["name"]]);
-		} else if(isset($this->callData["ability"])) {
-			// Get all items of that ability
-			$this->_ = $this->parent->wiseMen[$this->callData["type"]][$this->callData["ability"]];
-		} else if(isset($this->callData["type"])) {
-			// Get all items of that type
-			$this->_ = $this->parent->wiseMen[$this->callData["type"]];
-		}
 	}
 	
 	// =============================
@@ -277,6 +265,8 @@ class KnowledgeBase implements Iterator {
 	// Iteration
 	// =============================
 	public function rewind() {
+		$this->refreshArray();
+		
 		reset($this->_);
 	}
 	
@@ -294,6 +284,32 @@ class KnowledgeBase implements Iterator {
 	
 	public function valid() {
 		return $var = $this->current() !== false;
+	}
+	
+	// Set the array to the correct data
+	private function refreshArray() {
+		// The final array
+		$result = array();
+		
+		foreach($this->parent->wiseMen as $typename => $type) {
+			// Filter items by type
+			if(isset($this->callData["type"]) && $this->callData["type"] != $typename) continue;
+			
+			foreach($type as $abilityname => $ability) {
+				// Filter items by ability
+				if(isset($this->callData["ability"]) && $this->callData["ability"] != $abilityname) continue;
+				
+				foreach($ability as $name => $data) {
+					// Filter items by name
+					if(isset($this->callData["name"]) && $this->callData["name"] != $name) continue;
+					
+					$result[] = $data;
+				}
+			}
+		}
+		
+		// Set the array to the result
+		$this->_ = $result;
 	}
 }
 
