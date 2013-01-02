@@ -108,8 +108,13 @@ class KnowledgeBase implements Iterator {
 			} else if(in_array($name, $this->parent->setters) || in_array($name, $this->parent->getters) || in_array($name, $this->parent->removers)) {
 				// The last element of the chain
 				
-				// We need all data set by phrases to do anything here
-				if(isset($this->callData["name"]) && isset($this->callData["ability"]) && isset($this->callData["type"])) {
+				// We need at least the name set by phrases to do anything here
+				if(isset($this->callData["name"])) {
+					// Set some fallback data
+					$queryType = (isset($this->callData["type"]))? $this->callData["type"] : false;
+					$queryAbility = (isset($this->callData["ability"]))? $this->callData["ability"] : false;
+					$queryName = $this->callData["name"];
+					
 					if(in_array($name, $this->parent->setters)) {
 						// It is a setter
 						
@@ -119,17 +124,17 @@ class KnowledgeBase implements Iterator {
 						}
 						
 						// Set the data
-						return $this->parent->setObj($this->callData["type"], $this->callData["ability"], $this->callData["name"], $arguments[0]);
+						return $this->parent->setObj($queryType, $queryAbility, $queryName, $arguments[0]);
 					} else if(in_array($name, $this->parent->getters)) {
 						// It is a getter
 						
 						// Get the data and return it
-						return $this->parent->getObj($this->callData["type"], $this->callData["ability"], $this->callData["name"]);
+						return $this->parent->getObj($queryType, $queryAbility, $queryName);
 					} else if(in_array($name, $this->parent->removers)) {
 						// It is a remover
 						
 						// Remove the data
-						return $this->parent->removeObj($this->callData["type"], $this->callData["ability"], $this->callData["name"]);
+						return $this->parent->removeObj($queryType, $queryAbility, $queryName);
 					} else {
 						// The KB does not know what to do (no fitting task defined)
 						// Should never happen - then it would be a bug in here
@@ -137,7 +142,7 @@ class KnowledgeBase implements Iterator {
 					}
 				} else {
 					// Not all data available
-					throw new Exception("There is some data missing needed to call this.");
+					throw new Exception("You must first define at least a name in the queue to call that.");
 				}
 			}
 		}

@@ -109,6 +109,10 @@ $kb->People_think_I_am_very_good_at_writing("code")->I_am_the("student named luX
 $kb->I_am_a("computer")->I_can("surf the web")->and_my_name_is("MacBook Air")->set("I have a lot information!");
 $kb->I_am_a("dinner")->I_can("make people well-fed")->and_my_name_is("I don't know, actually...")->set("Yay! I'm in the KB");
 
+// This item does not know what type it is (it does, but just as an example)
+// You can basiclly omit anything besides the name
+$kb->I_can("produce *real* speaking code")->my_name_is("KnowledgeBase")->set("That's me!");
+
 // Let us get all students from the KB and iterate (you can do that with any queue object!)
 echo "Iterate through some items:\n";
 foreach($kb->All_of_type("student") as $item) {
