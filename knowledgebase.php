@@ -316,6 +316,13 @@ class KnowledgeBase implements Iterator {
 		// Set the array to the result
 		$this->_ = $result;
 	}
+	
+	// =============================
+	// String representation
+	// =============================
+	public function __toString() {
+		return $this->parent->name;
+	}
 }
 
 // =============================

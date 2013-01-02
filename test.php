@@ -12,7 +12,10 @@ echo "You can also get it using the instance var: " . $kb->name . "\n";
 
 // You can define names to get the KB name
 $kb->defineNameGetter("tell_me_your_name");
-echo "Name got using the new defined name getter: " . $kb->tell_me_your_name() . "\n\n";
+echo "Name got using the new defined name getter: " . $kb->tell_me_your_name() . "\n";
+
+// You can also just print out the object
+echo "The same using the object itself:           " . $kb . "\n\n";
 
 // Let's add a person to it who can program and who's name is Lukas.
 // He has this cool data - but as it says, that could be *anything* valid in PHP.
@@ -111,7 +114,7 @@ $kb->I_am_a("dinner")->I_can("make people well-fed")->and_my_name_is("I don't kn
 
 // This item does not know what type it is (it does, but just as an example)
 // You can basiclly omit anything besides the name
-$kb->I_can("produce *real* speaking code")->my_name_is("KnowledgeBase")->set("That's me!");
+$kb->I_can("produce *real* speaking code")->my_name_is("KnowledgeBase")->set($kb);
 
 // Let us get all students from the KB and iterate (you can do that with any queue object!)
 echo "Iterate through some items:\n";
