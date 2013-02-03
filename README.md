@@ -7,7 +7,14 @@ You already can, I hear you say. No, this one is cooler!
 
 ## Try it
 
-You can find a demo file in this repo called `demo.php` with all stuff `KnowledgeBase.php` can do.
+You can find a demo file with a lot of comments in this repo called `demo.php` with all stuff `KnowledgeBase.php` can do at the moment.
+
+You can run automated tests using [PHPUnit](http://www.phpunit.de):
+Simply run
+
+	$ phpunit
+
+from the root directory of the repo.
 
 Have fun!
 
