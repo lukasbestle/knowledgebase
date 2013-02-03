@@ -13,7 +13,7 @@ Have fun!
 
 ## What the fuck?! Why did you code that?
 
-There are some simple reasons why I did that as an one-hour project. Here they are:
+There are some simple reasons why I did that as an four-hour project. Here they are:
 
 1. There are some languages like Prolog or SQL doing exactly that: Offering a way to parse spoken words as valid code. Why not offer such a way for objects in PHP? :)
 3. Some people always say "Let your code and variable names speak so someone can understand it!". Here you go!
