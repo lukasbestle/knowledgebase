@@ -1,4 +1,4 @@
-# KnowledgeBase.php
+# KnowledgeBase.php [![Build Status](https://travis-ci.org/vis7mac/knowledgebase.png?branch=master)](https://travis-ci.org/vis7mac/knowledgebase)
 
 > An object storage producing *real* speaking code implemented in PHP.
 
