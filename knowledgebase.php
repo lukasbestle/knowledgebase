@@ -77,7 +77,7 @@ class KnowledgeBase implements Iterator {
 				// There's a phrase for that!
 				
 				// We need the argument for any phrase
-				if(!isset($arguments[0])) throw new Exception("No argument given.");
+				if(!isset($arguments[0])) throw new InvalidArgumentException("No argument given.");
 				
 				// Get the correct phrase
 				$phrase = $this->parent->phrases[$name];
@@ -99,7 +99,7 @@ class KnowledgeBase implements Iterator {
 					return new $className($this->parent->name, $this->parent, $data);
 				} else {
 					// Couldn't match
-					throw new Exception("Input did not match phrase $name.");
+					throw new InvalidArgumentException("Input did not match phrase $name.");
 				}
 			} else if(in_array($name, $this->parent->nameGetters)) {
 				// User wants to get the name of the KB
@@ -120,7 +120,7 @@ class KnowledgeBase implements Iterator {
 						
 						// We need the argument (contains the data to set)
 						if(!isset($arguments[0])) {
-							throw new Exception("No argument given.");
+							throw new InvalidArgumentException("No argument given.");
 						}
 						
 						// Set the data
@@ -138,17 +138,17 @@ class KnowledgeBase implements Iterator {
 					} else {
 						// The KB does not know what to do (no fitting task defined)
 						// Should never happen - then it would be a bug in here
-						throw new Exception("Could not find a task. This is a bug in KB.php, please report it!");
+						throw new FatalException("Could not find a task. This is a bug in KB.php, please report it!");
 					}
 				} else {
 					// Not all data available
-					throw new Exception("You must first define at least a name in the queue to call that.");
+					throw new MissingException("You must first define at least a name in the queue to call that.");
 				}
 			}
 		}
 		
 		// The KB does not know what to do (no fitting task defined)
-		throw new Exception("There is no task doing that what you wanted.");
+		throw new BadMethodCallException("There is no task doing that what you wanted.");
 	}
 	
 	// =============================
@@ -166,7 +166,7 @@ class KnowledgeBase implements Iterator {
 	
 	public function getObj($type, $ability, $name) {
 		if(!isset($this->wiseMen[$type][$ability][$name])) {
-			throw new Exception("Could not find the element you requested.");
+			throw new OutOfBoundsException("Could not find the element you requested.");
 		}
 		
 		return $this->wiseMen[$type][$ability][$name];
@@ -174,7 +174,7 @@ class KnowledgeBase implements Iterator {
 	
 	public function removeObj($type, $ability, $name) {
 		if(!isset($this->wiseMen[$type][$ability][$name])) {
-			throw new Exception("Could not find the element you requested.");
+			throw new OutOfBoundsException("Could not find the element you requested.");
 		}
 		
 		unset($this->wiseMen[$type][$ability][$name]);
@@ -189,6 +189,8 @@ class KnowledgeBase implements Iterator {
 	// Helper functions (definers)
 	// =============================
 	public function defineNameGetter($name) {
+		if(array_search($name, $this->parent->nameGetters)) throw new DuplicateEntryException("This name getter '$name' was already defined!");
+		
 		$this->parent->nameGetters[] = $name;
 		
 		return $this->parent;
@@ -200,24 +202,32 @@ class KnowledgeBase implements Iterator {
 		$phrase = str_replace('$ability', '(?<ability>.+?)', $phrase);
 		$phrase = str_replace('$type', '(?<type>.+?)', $phrase);
 		
+		if(isset($this->parent->phrases[$name])) throw new DuplicateEntryException("The phrase '$name' was already defined!");
+		
 		$this->parent->phrases[$name] = $phrase;
 		
 		return $this->parent;
 	}
 	
 	public function defineSetter($name) {
+		if(array_search($name, $this->parent->setters)) throw new DuplicateEntryException("The setter '$name' was already defined!");
+		
 		$this->parent->setters[] = $name;
 		
 		return $this->parent;
 	}
 	
 	public function defineGetter($name) {
+		if(array_search($name, $this->parent->getters)) throw new DuplicateEntryException("The getter '$name' was already defined!");
+		
 		$this->parent->getters[] = $name;
 		
 		return $this->parent;
 	}
 	
 	public function defineRemover($name) {
+		if(array_search($name, $this->parent->removers)) throw new DuplicateEntryException("The remover '$name' was already defined!");
+		
 		$this->parent->removers[] = $name;
 		
 		return $this->parent;
@@ -229,6 +239,8 @@ class KnowledgeBase implements Iterator {
 	public function undefineNameGetter($name) {
 		if(array_search($name, $this->parent->nameGetters)) {
 			unset($this->parent->nameGetters[array_search($name, $this->parent->nameGetters)]);
+		} else {
+			throw new OutOfBoundsException("The name getter '$name' was not defined!");
 		}
 		
 		return $this->parent;
@@ -237,6 +249,8 @@ class KnowledgeBase implements Iterator {
 	public function undefinePhrase($name) {
 		if(isset($this->parent->phrases[$name])) {
 			unset($this->parent->phrases[$name]);
+		} else {
+			throw new OutOfBoundsException("The phrase '$name' was not defined!");
 		}
 		
 		return $this->parent;
@@ -245,6 +259,8 @@ class KnowledgeBase implements Iterator {
 	public function undefineSetter($name) {
 		if(array_search($name, $this->parent->setters)) {
 			unset($this->parent->setters[array_search($name, $this->parent->setters)]);
+		} else {
+			throw new OutOfBoundsException("The setter '$name' was not defined!");
 		}
 		
 		return $this->parent;
@@ -253,6 +269,8 @@ class KnowledgeBase implements Iterator {
 	public function undefineGetter($name) {
 		if(array_search($name, $this->parent->getters)) {
 			unset($this->parent->getters[array_search($name, $this->parent->getters)]);
+		} else {
+			throw new OutOfBoundsException("The getter '$name' was not defined!");
 		}
 		
 		return $this->parent;
@@ -261,6 +279,8 @@ class KnowledgeBase implements Iterator {
 	public function undefineRemover($name) {
 		if(array_search($name, $this->parent->removers)) {
 			unset($this->parent->removers[array_search($name, $this->parent->removers)]);
+		} else {
+			throw new OutOfBoundsException("The remover '$name' was not defined!");
 		}
 		
 		return $this->parent;
@@ -391,3 +411,10 @@ class WiseMan {
 		return print_r($this->__get("data"), true);
 	}
 }
+
+// =============================
+// Exceptions
+// =============================
+class DuplicateEntryException extends Exception {}
+class FatalException extends Exception {}
+class MissingException extends Exception {}
