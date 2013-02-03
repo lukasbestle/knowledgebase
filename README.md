@@ -7,7 +7,7 @@ You already can, I hear you say. No, this one is cooler!
 
 ## Try it
 
-You can find a demo file in this repo called `test.php` with all stuff `KnowledgeBase.php` can do.
+You can find a demo file in this repo called `demo.php` with all stuff `KnowledgeBase.php` can do.
 
 Have fun!
 
