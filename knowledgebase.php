@@ -1,13 +1,15 @@
 <?php
 
 /**
- * KnowledgeBase.php - an object storage producing *real* speaking code implemented in PHP.
+ * knowledgebase.php
+ * An object storage producing *real* speaking code implemented in PHP.
  *
  * @version 1.1
  * @author Lukas Bestle <lukas@lu-x.me>
  * @link http://lu-x.me
  * @copyright Copyright 2012-2012 Lukas Bestle
  * @license http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
+ * @package KnowledgeBase
  */
 
 class KnowledgeBase implements Iterator {
