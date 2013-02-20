@@ -420,3 +420,12 @@ class WiseMan {
 class DuplicateEntryException extends Exception {}
 class FatalException extends Exception {}
 class MissingException extends Exception {}
+
+// =============================
+// Fallback functions
+// =============================
+if(!function_exists('lcfirst')) {
+	function lcfirst($string)  {
+		return strtolower(substr($string, 0, 1)) . substr($string, 1);
+	}
+}
